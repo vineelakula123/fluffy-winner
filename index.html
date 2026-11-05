@@ -39,6 +39,19 @@ textarea{height:90px;resize:none;word-break:break-all}
 input[type=range]{width:100%;accent-color:var(--m);height:26px}
 .meter{height:8px;background:#000;border:1px solid var(--c)}
 .meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ok),var(--y),var(--m))}
+.stage{position:relative;width:100%;aspect-ratio:16/9;background:#000;border:2px solid var(--c);overflow:hidden}
+.stage video{width:100%;height:100%;border:0;aspect-ratio:auto;transform-origin:center;touch-action:none;user-select:none;-webkit-user-select:none}
+.stage.pan{cursor:grab;touch-action:none}
+.stage:fullscreen,.stage:-webkit-full-screen,.stage.fs{width:100vw;height:100vh;aspect-ratio:auto;border:0}
+.stage.fs{position:fixed;inset:0;z-index:99}
+.stage:fullscreen video,.stage:-webkit-full-screen video,.stage.fs video{object-fit:contain}
+.xy{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.7);color:var(--y);padding:4px 6px;font:8px ui-monospace,Menlo,monospace;pointer-events:none}
+.xfs{position:absolute;right:8px;top:8px;display:none;flex:none;min-width:0;background:rgba(0,0,0,.7)}
+.stage.fs .xfs{display:block}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:240px;margin:0 auto 14px}
+.pad button{padding:14px 0;border:2px solid var(--c);background:transparent;color:var(--c);font:inherit;font-size:14px;cursor:pointer}
+.pad button:active{background:var(--c);color:#000}
+.pad button.mid{border-color:var(--y);color:var(--y)}
 </style>
 </head>
 <body>
@@ -66,8 +79,19 @@ input[type=range]{width:100%;accent-color:var(--m);height:26px}
 </div>
 <div class="card cut">
 <div class="step">03 // LIVE FEED</div>
-<video id="remote" autoplay playsinline muted></video>
-<div class="row"><button class="b" id="full">FULLSCREEN</button></div>
+<div class="stage" id="stage"><video id="remote" autoplay playsinline muted></video>
+<button class="b xfs" id="xfs">EXIT</button><div class="xy" id="xy">X 0 Y 0 1.0x</div></div>
+<div class="row"><button class="b" id="full">FULLSCREEN</button><button class="b" id="pr">RESET VIEW</button></div>
+<div class="step" style="margin-top:16px">CAMERA POSITION</div>
+<div class="pad" id="pad">
+<button data-x="-100" data-y="-100">&#8598;</button><button data-x="0" data-y="-100">&#8593;</button><button data-x="100" data-y="-100">&#8599;</button>
+<button data-x="-100" data-y="0">&#8592;</button><button class="mid" data-x="0" data-y="0">&#9679;</button><button data-x="100" data-y="0">&#8594;</button>
+<button data-x="-100" data-y="100">&#8601;</button><button data-x="0" data-y="100">&#8595;</button><button data-x="100" data-y="100">&#8600;</button>
+</div>
+<div class="ch"><label><span>X AXIS: LEFT / RIGHT</span><span id="vX">0</span></label><input type="range" id="px" min="-100" max="100" value="0"></div>
+<div class="ch"><label><span>Y AXIS: TOP / BOTTOM</span><span id="vY">0</span></label><input type="range" id="py" min="-100" max="100" value="0"></div>
+<div class="ch"><label><span>ZOOM</span><span id="vZ">1.0x</span></label><input type="range" id="pz" min="100" max="400" value="100"></div>
+<div class="note">Zoom in, then use the arrows, sliders, or drag the video to move the view. This is a digital pan/tilt on the iPad.</div>
 </div>
 <div class="card cut" id="mixbox">
 <div class="step">04 // AUDIO MIX BOX</div>
@@ -122,7 +146,7 @@ function setS(t,c){$("st").textContent=t;$("led").className="led "+(c||"")}
 function show(w){$("phone").classList.toggle("hide",w!=="p");$("ipad").classList.toggle("hide",w!=="i");$("tP").classList.toggle("act",w==="p");$("tI").classList.toggle("act",w==="i")}
 $("tP").onclick=()=>show("p");$("tI").onclick=()=>show("i");
 const enc=d=>btoa(unescape(encodeURIComponent(JSON.stringify({t:d.type,s:d.sdp}))));
-const dec=s=>{const o=JSON.parse(decodeURIComponent(escape(atob(s.trim().replace(/\s+/g,"")))));return{type:o.t,sdp:o.s}};
+const dec=s=>{s=s.replace(/[^A-Za-z0-9+\/=_-]/g,"").replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";const o=JSON.parse(decodeURIComponent(escape(atob(s))));if(!o||!o.s)throw new Error("empty");return{type:o.t,sdp:o.s}};
 function newPC(){
  if(pc)pc.close();
  pc=new RTCPeerConnection(cfg);
@@ -153,22 +177,65 @@ $("mkOffer").onclick=async()=>{
  $("offer").value=enc(pc.localDescription);setS("CODE READY","wait");
 };
 $("connect").onclick=async()=>{
- try{await pc.setRemoteDescription(dec($("answerIn").value));setS("HANDSHAKING","wait")}
- catch(e){setS("INVALID REPLY CODE","bad")}
+ try{
+  if(!pc){setS("TAP GENERATE CODE FIRST","bad");return}
+  const d=dec($("answerIn").value);
+  if(d.type!=="answer"){setS("THAT IS NOT THE IPAD REPLY","bad");return}
+  await pc.setRemoteDescription(d);setS("HANDSHAKING","wait")}
+ catch(e){console.error(e);setS("INVALID REPLY: "+String(e.message||e.name).slice(0,50),"bad")}
 };
 $("mkAnswer").onclick=async()=>{
+ let d;
+ try{d=dec($("offerIn").value)}catch(e){setS("BAD CODE: PASTE THE FULL PHONE CODE","bad");return}
+ if(d.type!=="offer"){setS("THAT IS A "+String(d.type).toUpperCase()+" CODE, NEED PHONE CODE","bad");return}
  try{
   newPC();setS("BUILDING REPLY...","wait");
-  await pc.setRemoteDescription(dec($("offerIn").value));
+  await pc.setRemoteDescription(d);
   await pc.setLocalDescription(await pc.createAnswer());await gathered();
   $("answer").value=enc(pc.localDescription);setS("REPLY READY","wait");
- }catch(e){setS("INVALID PHONE CODE","bad")}
+ }catch(e){console.error(e);setS("INVALID PHONE CODE: "+String(e.message||e.name).slice(0,50),"bad")}
 };
 document.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{
  const el=$(b.dataset.copy);el.select();
  try{await navigator.clipboard.writeText(el.value)}catch(e){document.execCommand("copy")}
  const o=b.textContent;b.textContent="COPIED";setTimeout(()=>b.textContent=o,1200)});
-$("full").onclick=()=>{const v=$("remote");(v.requestFullscreen||v.webkitEnterFullscreen||v.webkitRequestFullscreen).call(v)};
+/* ---- CAMERA POSITION (digital pan / tilt / zoom) ---- */
+const V={x:0,y:0,z:1},cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+function applyView(){
+ const m=(V.z-1)*50;
+ $("remote").style.transform=`translate(${-V.x/100*m}%,${-V.y/100*m}%) scale(${V.z})`;
+ $("px").value=V.x;$("py").value=V.y;$("pz").value=V.z*100;
+ $("vX").textContent=Math.round(V.x);$("vY").textContent=Math.round(V.y);$("vZ").textContent=V.z.toFixed(1)+"x";
+ $("xy").textContent="X "+Math.round(V.x)+" Y "+Math.round(V.y)+" "+V.z.toFixed(1)+"x";
+ $("stage").classList.toggle("pan",V.z>1);
+}
+function needZoom(){if(V.z<1.5)V.z=2}
+document.querySelectorAll("#pad button").forEach(b=>b.onclick=()=>{
+ const x=+b.dataset.x,y=+b.dataset.y;
+ if(x||y)needZoom();else V.z=1;
+ V.x=x;V.y=y;applyView()});
+$("px").oninput=()=>{needZoom();V.x=+$("px").value;applyView()};
+$("py").oninput=()=>{needZoom();V.y=+$("py").value;applyView()};
+$("pz").oninput=()=>{V.z=+$("pz").value/100;applyView()};
+$("pr").onclick=()=>{V.x=V.y=0;V.z=1;applyView()};
+(()=>{const st=$("stage");let dr=null;
+ st.addEventListener("pointerdown",e=>{if(V.z<=1)return;dr={x:e.clientX,y:e.clientY};try{st.setPointerCapture(e.pointerId)}catch(_){}});
+ st.addEventListener("pointermove",e=>{if(!dr)return;
+  const r=st.getBoundingClientRect(),k=200/(V.z-1);
+  V.x=cl(V.x-(e.clientX-dr.x)/r.width*k,-100,100);V.y=cl(V.y-(e.clientY-dr.y)/r.height*k,-100,100);
+  dr={x:e.clientX,y:e.clientY};applyView()});
+ const end=()=>{dr=null};st.addEventListener("pointerup",end);st.addEventListener("pointercancel",end);
+ st.addEventListener("dblclick",()=>{V.x=V.y=0;V.z=V.z>1?1:2;applyView()});
+})();
+function pseudoFS(on){$("stage").classList.toggle("fs",on)}
+$("full").onclick=()=>{
+ const s=$("stage"),f=s.requestFullscreen||s.webkitRequestFullscreen;
+ if(!f){pseudoFS(true);return}
+ let r;try{r=f.call(s)}catch(e){pseudoFS(true);return}
+ if(r&&r.catch)r.catch(()=>pseudoFS(true));
+};
+$("xfs").onclick=()=>{if(document.fullscreenElement||document.webkitFullscreenElement){(document.exitFullscreen||document.webkitExitFullscreen).call(document)}pseudoFS(false)};
+applyView();
 
 /* ---- AUDIO MIX BOX ---- */
 function an(){const a=ctx.createAnalyser();a.fftSize=256;return a}
