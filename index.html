@@ -52,6 +52,13 @@ input[type=range]{width:100%;accent-color:var(--m);height:26px}
 .pad button{padding:14px 0;border:2px solid var(--c);background:transparent;color:var(--c);font:inherit;font-size:14px;cursor:pointer}
 .pad button:active{background:var(--c);color:#000}
 .pad button.mid{border-color:var(--y);color:var(--y)}
+.stage .cam{position:absolute;inset:0;overflow:hidden}
+#gameV{position:absolute;inset:0;display:none;object-fit:contain;transform:none!important}
+.stage[data-mode=game] #gameV,.stage[data-mode=both] #gameV{display:block}
+.stage[data-mode=game] .cam{display:none}
+.stage[data-mode=both] .cam{inset:auto 6px 6px auto;width:30%;height:auto;aspect-ratio:16/9;border:2px solid var(--y);z-index:2}
+.stage[data-mode=both] .xy,.stage[data-mode=game] .xy{display:none}
+.xfs{z-index:5}
 </style>
 </head>
 <body>
@@ -79,9 +86,14 @@ input[type=range]{width:100%;accent-color:var(--m);height:26px}
 </div>
 <div class="card cut">
 <div class="step">03 // LIVE FEED</div>
-<div class="stage" id="stage"><video id="remote" autoplay playsinline muted></video>
+<div class="stage" id="stage"><video id="gameV" autoplay playsinline muted></video><div class="cam"><video id="remote" autoplay playsinline muted></video></div>
 <button class="b xfs" id="xfs">EXIT</button><div class="xy" id="xy">X 0 Y 0 1.0x</div></div>
 <div class="row"><button class="b" id="full">FULLSCREEN</button><button class="b" id="pr">RESET VIEW</button></div>
+<div class="step" style="margin-top:16px">GAME CAPTURE (CAPTURE CARD)</div>
+<select id="vdev"><option value="">Tap SCAN VIDEO</option></select>
+<div class="row"><button class="b" id="vscan">SCAN VIDEO</button><button class="b p" id="gstart">START GAME</button></div>
+<div class="row"><button class="b" data-m="game">GAME ONLY</button><button class="b" data-m="both">GAME + CAM</button><button class="b" data-m="cam">CAM ONLY</button></div>
+<div class="note">Plug the capture card into the iPad (USB-C), tap SCAN VIDEO, pick the card, tap START GAME. For game sound use CARD SOUND INPUT in step 04.</div>
 <div class="step" style="margin-top:16px">CAMERA POSITION</div>
 <div class="pad" id="pad">
 <button data-x="-100" data-y="-100">&#8598;</button><button data-x="0" data-y="-100">&#8593;</button><button data-x="100" data-y="-100">&#8599;</button>
@@ -199,6 +211,30 @@ document.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{
  const el=$(b.dataset.copy);el.select();
  try{await navigator.clipboard.writeText(el.value)}catch(e){document.execCommand("copy")}
  const o=b.textContent;b.textContent="COPIED";setTimeout(()=>b.textContent=o,1200)});
+/* ---- GAME CAPTURE ---- */
+let gameStream;
+function setMode(m){$("stage").dataset.mode=m}
+setMode("cam");
+document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+$("vscan").onclick=async()=>{
+ try{
+  const t=await navigator.mediaDevices.getUserMedia({video:true});t.getTracks().forEach(x=>x.stop());
+  const d=(await navigator.mediaDevices.enumerateDevices()).filter(x=>x.kind==="videoinput");
+  $("vdev").innerHTML=d.map(x=>`<option value="${x.deviceId}">${x.label||"Video input"}</option>`).join("")||"<option>No video inputs</option>";
+  const g=d.find(x=>/capture|usb|hdmi|link|elgato|avermedia|video/i.test(x.label)&&!/front|back|rear|facetime/i.test(x.label));
+  if(g)$("vdev").value=g.deviceId;
+  setS(d.length+" VIDEO INPUT(S) FOUND","wait");
+ }catch(e){setS("VIDEO ACCESS: "+e.name,"bad")}
+};
+$("gstart").onclick=async()=>{
+ try{
+  if(gameStream)gameStream.getTracks().forEach(t=>t.stop());
+  const id=$("vdev").value;
+  gameStream=await navigator.mediaDevices.getUserMedia({video:{...(id?{deviceId:{exact:id}}:{}),width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:60}},audio:false});
+  $("gameV").srcObject=gameStream;$("gameV").play().catch(()=>{});
+  setMode("both");setS("GAME CAPTURE LIVE","on");
+ }catch(e){setS("GAME CAPTURE: "+e.name,"bad")}
+};
 /* ---- CAMERA POSITION (digital pan / tilt / zoom) ---- */
 const V={x:0,y:0,z:1},cl=(v,a,b)=>Math.max(a,Math.min(b,v));
 function applyView(){
