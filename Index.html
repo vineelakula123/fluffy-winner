@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NEXCAM // Cyber Link</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#07040f;--panel:rgba(18,10,34,.85);--y:#fcee0a;--c:#00f0ff;--m:#ff2a6d;--ok:#39ff9a;--tx:#f2ecff;--mut:#8a7fb0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--tx);font-family:"Press Start 2P",ui-monospace,Menlo,monospace;font-size:9px;line-height:1.8;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(circle at 85% 0%,rgba(255,42,109,.3),transparent 45%),radial-gradient(circle at 0% 100%,rgba(0,240,255,.22),transparent 45%),repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 3px)}
+main{max-width:560px;margin:0 auto;padding:18px 14px 40px}
+h1{font-size:24px;margin:8px 0 4px;color:var(--y);text-shadow:3px 0 var(--m),-3px 0 var(--c);animation:g 3s infinite steps(1)}
+@keyframes g{0%,92%,100%{transform:none}93%{transform:translate(3px,0)}95%{transform:translate(-3px,1px)}97%{transform:translate(2px,-1px)}}
+.sub{font-size:8px;color:var(--c);margin-bottom:16px}
+.cut{clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px))}
+.status{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--y);color:#000;font-size:9px}
+.led{width:10px;height:10px;background:#000}
+.led.on{background:#0a7a3f;animation:p 1.2s infinite}.led.bad{background:var(--m)}.led.wait{background:#00a0aa;animation:p .8s infinite}
+@keyframes p{50%{opacity:.3}}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.tab{padding:12px 6px;border:2px solid var(--c);background:transparent;color:var(--c);font:inherit;font-size:9px;cursor:pointer}
+.tab.act{background:var(--c);color:#000;box-shadow:4px 4px 0 var(--m)}
+.card{background:var(--panel);border:2px solid var(--m);padding:14px;margin-bottom:14px;box-shadow:5px 5px 0 rgba(0,240,255,.45)}
+.step{color:var(--y);margin-bottom:10px;font-size:9px}
+video{width:100%;aspect-ratio:16/9;background:#000;border:2px solid var(--c);object-fit:cover}
+textarea,select{width:100%;background:#000;color:var(--c);border:2px solid var(--c);padding:10px;font:9px ui-monospace,Menlo,monospace}
+textarea{height:90px;resize:none;word-break:break-all}
+.row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.b{flex:1;min-width:110px;padding:12px 8px;border:2px solid var(--y);background:transparent;color:var(--y);font:inherit;font-size:8px;cursor:pointer}
+.b:active,.b.p{background:var(--y);color:#000}
+.b.p:active{background:var(--m);color:#fff}
+.note{color:var(--mut);margin-top:10px;font-size:8px;line-height:2}
+.hide{display:none}
+.ch{margin-bottom:12px}
+.ch label{display:flex;justify-content:space-between;color:var(--c);margin-bottom:6px}
+input[type=range]{width:100%;accent-color:var(--m);height:26px}
+.meter{height:8px;background:#000;border:1px solid var(--c)}
+.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ok),var(--y),var(--m))}
+</style>
+</head>
+<body>
+<main>
+<h1>NEXCAM</h1>
+<div class="sub">&gt; CYBER LINK // iPAD + PHONE_</div>
+<div class="status cut"><span class="led" id="led"></span><span id="st">STANDBY</span></div>
+
+<div class="tabs">
+<button class="tab act" id="tI">1 · iPAD</button>
+<button class="tab" id="tP">2 · PHONE</button>
+</div>
+
+<section id="ipad">
+<div class="card cut">
+<div class="step">01 // PASTE PHONE CODE</div>
+<textarea id="offerIn" placeholder="Paste the code from the phone"></textarea>
+<div class="row"><button class="b p" id="mkAnswer">GENERATE REPLY</button></div>
+</div>
+<div class="card cut">
+<div class="step">02 // SEND REPLY BACK</div>
+<textarea id="answer" readonly placeholder="Reply appears here"></textarea>
+<div class="row"><button class="b" data-copy="answer">COPY REPLY</button></div>
+<div class="note">Paste it on the phone page (step 03), then tap CONNECT.</div>
+</div>
+<div class="card cut">
+<div class="step">03 // LIVE FEED</div>
+<video id="remote" autoplay playsinline muted></video>
+<div class="row"><button class="b" id="full">FULLSCREEN</button></div>
+</div>
+<div class="card cut" id="mixbox">
+<div class="step">04 // AUDIO MIX BOX</div>
+<div class="row" style="margin-top:0">
+<button class="b p" id="aOn">ENABLE AUDIO</button>
+<button class="b" id="tone">TEST SPEAKER</button>
+</div>
+<div class="ch" style="margin-top:14px"><label><span>PHONE MIC</span><span id="vm">100</span></label>
+<input type="range" id="gm" min="0" max="200" value="100"><div class="meter"><i id="mm"></i></div></div>
+<div class="ch"><label><span>CARD / GAME</span><span id="vc">100</span></label>
+<input type="range" id="gc" min="0" max="200" value="100"><div class="meter"><i id="mc"></i></div></div>
+<div class="ch"><label><span>MASTER</span><span id="vx">100</span></label>
+<input type="range" id="gx" min="0" max="150" value="100"><div class="meter"><i id="mx"></i></div></div>
+<div class="step" style="margin-top:14px">CARD SOUND INPUT</div>
+<select id="dev"><option value="">Tap SCAN INPUTS</option></select>
+<div class="row">
+<button class="b" id="scan">SCAN INPUTS</button>
+<button class="b p" id="testCard">TEST CARD SOUND</button>
+</div>
+<div class="note">Everything plays out of the iPad speaker through this mixer. If you hear the game twice, mute it in Orion or set CARD / GAME to 0 here. Keep the phone away from the iPad speaker to avoid echo.</div>
+</div>
+</section>
+
+<section id="phone" class="hide">
+<div class="card cut">
+<div class="step">01 // ACTIVATE CAMERA + MIC</div>
+<video id="local" autoplay muted playsinline></video>
+<div class="row"><button class="b p" id="cam">START CAMERA</button><button class="b" id="flip">FLIP</button></div>
+</div>
+<div class="card cut">
+<div class="step">02 // CREATE LINK CODE</div>
+<button class="b p" id="mkOffer" style="width:100%">GENERATE CODE</button>
+<textarea id="offer" readonly placeholder="Code appears here" style="margin-top:10px"></textarea>
+<div class="row"><button class="b" data-copy="offer">COPY CODE</button></div>
+<div class="note">Send this to the iPad page by AirDrop, Messages or Notes.</div>
+</div>
+<div class="card cut">
+<div class="step">03 // PASTE iPAD REPLY</div>
+<textarea id="answerIn" placeholder="Paste the reply from the iPad"></textarea>
+<div class="row"><button class="b p" id="connect">CONNECT</button></div>
+</div>
+</section>
+
+<div class="card cut"><div class="step">LINK TIPS</div>
+<div class="note">&gt; Same Wi-Fi on both, no VPN, Private Relay off.<br>&gt; Keep both pages open until status says LINKED.<br>&gt; Always make a fresh code per attempt.</div></div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let pc,stream,facing="user",ctx,master,gM,gC,aM,aC,aX,remoteStream,cardStream,mSrc,cSrc;
+const cfg={iceServers:[{urls:"stun:stun.l.google.com:19302"},{urls:"stun:stun1.l.google.com:19302"}]};
+function setS(t,c){$("st").textContent=t;$("led").className="led "+(c||"")}
+function show(w){$("phone").classList.toggle("hide",w!=="p");$("ipad").classList.toggle("hide",w!=="i");$("tP").classList.toggle("act",w==="p");$("tI").classList.toggle("act",w==="i")}
+$("tP").onclick=()=>show("p");$("tI").onclick=()=>show("i");
+const enc=d=>btoa(unescape(encodeURIComponent(JSON.stringify({t:d.type,s:d.sdp}))));
+const dec=s=>{const o=JSON.parse(decodeURIComponent(escape(atob(s.trim().replace(/\s+/g,"")))));return{type:o.t,sdp:o.s}};
+function newPC(){
+ if(pc)pc.close();
+ pc=new RTCPeerConnection(cfg);
+ pc.onconnectionstatechange=()=>{const s=pc.connectionState;
+  if(s==="connected")setS("LINKED","on");
+  else if(s==="connecting")setS("HANDSHAKING","wait");
+  else if(s==="failed")setS("LINK FAILED - NEW CODE","bad");
+  else if(s==="disconnected")setS("SIGNAL LOST","bad")};
+ pc.ontrack=e=>{remoteStream=e.streams[0];$("remote").srcObject=remoteStream;$("remote").play().catch(()=>{});hookMic()};
+}
+function gathered(){return new Promise(r=>{if(pc.iceGatheringState==="complete")return r();
+ const t=setTimeout(r,5000);
+ pc.onicegatheringstatechange=()=>{if(pc.iceGatheringState==="complete"){clearTimeout(t);r()}}})}
+async function startCam(){
+ try{
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}},audio:{echoCancellation:true,noiseSuppression:true}});
+  $("local").srcObject=stream;setS("CAMERA ONLINE","wait");
+ }catch(e){setS("CAMERA BLOCKED: "+e.name,"bad")}
+}
+$("cam").onclick=startCam;
+$("flip").onclick=()=>{facing=facing==="user"?"environment":"user";startCam()};
+$("mkOffer").onclick=async()=>{
+ if(!stream){await startCam();if(!stream)return}
+ newPC();stream.getTracks().forEach(t=>pc.addTrack(t,stream));
+ setS("BUILDING CODE...","wait");
+ await pc.setLocalDescription(await pc.createOffer());await gathered();
+ $("offer").value=enc(pc.localDescription);setS("CODE READY","wait");
+};
+$("connect").onclick=async()=>{
+ try{await pc.setRemoteDescription(dec($("answerIn").value));setS("HANDSHAKING","wait")}
+ catch(e){setS("INVALID REPLY CODE","bad")}
+};
+$("mkAnswer").onclick=async()=>{
+ try{
+  newPC();setS("BUILDING REPLY...","wait");
+  await pc.setRemoteDescription(dec($("offerIn").value));
+  await pc.setLocalDescription(await pc.createAnswer());await gathered();
+  $("answer").value=enc(pc.localDescription);setS("REPLY READY","wait");
+ }catch(e){setS("INVALID PHONE CODE","bad")}
+};
+document.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{
+ const el=$(b.dataset.copy);el.select();
+ try{await navigator.clipboard.writeText(el.value)}catch(e){document.execCommand("copy")}
+ const o=b.textContent;b.textContent="COPIED";setTimeout(()=>b.textContent=o,1200)});
+$("full").onclick=()=>{const v=$("remote");(v.requestFullscreen||v.webkitEnterFullscreen||v.webkitRequestFullscreen).call(v)};
+
+/* ---- AUDIO MIX BOX ---- */
+function an(){const a=ctx.createAnalyser();a.fftSize=256;return a}
+function ensureCtx(){
+ if(ctx){ctx.resume();return}
+ try{navigator.audioSession&&(navigator.audioSession.type="play-and-record")}catch(e){}
+ ctx=new (window.AudioContext||window.webkitAudioContext)();
+ master=ctx.createGain();gM=ctx.createGain();gC=ctx.createGain();
+ aM=an();aC=an();aX=an();
+ gM.connect(aM);gM.connect(master);gC.connect(aC);gC.connect(master);
+ master.connect(aX);master.connect(ctx.destination);
+ setVol();hookMic();meters();ctx.resume();
+}
+function setVol(){
+ if(!ctx)return;
+ gM.gain.value=$("gm").value/100;gC.gain.value=$("gc").value/100;master.gain.value=$("gx").value/100;
+}
+["gm","gc","gx"].forEach(k=>$(k).oninput=()=>{$({gm:"vm",gc:"vc",gx:"vx"}[k]).textContent=$(k).value;setVol()});
+function hookMic(){
+ if(!ctx||!remoteStream||!remoteStream.getAudioTracks().length)return;
+ if(mSrc)mSrc.disconnect();
+ mSrc=ctx.createMediaStreamSource(remoteStream);mSrc.connect(gM);
+}
+function meters(){
+ const buf=new Uint8Array(128),map=[[aM,"mm"],[aC,"mc"],[aX,"mx"]];
+ (function f(){map.forEach(([a,id])=>{a.getByteTimeDomainData(buf);let m=0;for(const v of buf)m=Math.max(m,Math.abs(v-128));$(id).style.width=Math.min(100,m/128*140)+"%"});requestAnimationFrame(f)})();
+}
+$("aOn").onclick=()=>{ensureCtx();setS("AUDIO ONLINE - SPEAKER","on");$("aOn").textContent="AUDIO ON"};
+$("tone").onclick=()=>{
+ ensureCtx();
+ const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=660;g.gain.value=.25;
+ o.connect(g);g.connect(master);o.start();o.stop(ctx.currentTime+.6);
+ setS("TEST TONE SENT","wait");
+};
+$("scan").onclick=async()=>{
+ try{
+  const t=await navigator.mediaDevices.getUserMedia({audio:true});t.getTracks().forEach(x=>x.stop());
+  const d=(await navigator.mediaDevices.enumerateDevices()).filter(x=>x.kind==="audioinput");
+  $("dev").innerHTML=d.map(x=>`<option value="${x.deviceId}">${x.label||"Input"}</option>`).join("")||"<option>No inputs found</option>";
+  setS(d.length+" INPUT(S) FOUND","wait");
+ }catch(e){setS("MIC ACCESS: "+e.name,"bad")}
+};
+$("testCard").onclick=async()=>{
+ ensureCtx();
+ try{
+  if(cardStream)cardStream.getTracks().forEach(t=>t.stop());
+  if(cSrc)cSrc.disconnect();
+  const id=$("dev").value;
+  cardStream=await navigator.mediaDevices.getUserMedia({audio:{...(id?{deviceId:{exact:id}}:{}),echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+  cSrc=ctx.createMediaStreamSource(cardStream);cSrc.connect(gC);
+  setS("CARD AUDIO LIVE - WATCH METER","on");
+ }catch(e){setS("CARD AUDIO: "+e.name,"bad")}
+};
+</script>
+</body>
+</html>
