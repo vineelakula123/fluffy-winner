@@ -59,103 +59,201 @@ input[type=range]{width:100%;accent-color:var(--m);height:26px}
 .stage[data-mode=both] .cam{inset:auto 6px 6px auto;width:30%;height:auto;aspect-ratio:16/9;border:2px solid var(--y);z-index:2}
 .stage[data-mode=both] .xy,.stage[data-mode=game] .xy{display:none}
 .xfs{z-index:5}
+/* ---- clarity ---- */
+.hint{color:var(--c);font-size:8px;line-height:2;margin:10px 2px 0}
+.who{display:inline-block;padding:2px 6px;margin-right:6px;color:#000;font-size:8px}
+.who.ph{background:var(--m);color:#fff}.who.ip{background:var(--c)}
+.tab small{font-size:7px;opacity:.8}
+.guide{margin-top:14px}.guide summary{color:var(--y);cursor:pointer;font-size:9px}
+.step b.who{font-weight:400}
+.stage video{background:transparent}
+.stage::before{content:"NO SIGNAL";position:absolute;inset:0;display:grid;place-items:center;color:var(--m);font-size:12px;animation:ns .9s infinite steps(1);background:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 2px,transparent 2px 4px)}
+@keyframes ns{0%{opacity:1;transform:translateX(0)}20%{opacity:.4;transform:translateX(-4px)}40%{opacity:1;transform:translateX(5px)}60%{opacity:.6;transform:translateX(-2px)}80%{opacity:1}}
+/* ---- glitch animations ---- */
+h1{text-shadow:none;animation:none;position:relative;display:inline-block;color:var(--y)}
+h1::before,h1::after{content:attr(data-t);position:absolute;left:0;top:0}
+h1::before{color:var(--c);transform:translateX(-3px);animation:s1 2.4s infinite steps(1)}
+h1::after{color:var(--m);transform:translateX(3px);animation:s2 1.9s infinite steps(1)}
+@keyframes s1{0%{clip-path:inset(10% 0 70% 0)}20%{clip-path:inset(50% 0 20% 0)}40%{clip-path:inset(0 0 88% 0)}60%{clip-path:inset(72% 0 4% 0)}80%{clip-path:inset(30% 0 45% 0)}100%{clip-path:inset(0 0 100% 0)}}
+@keyframes s2{0%{clip-path:inset(60% 0 10% 0)}25%{clip-path:inset(5% 0 80% 0)}50%{clip-path:inset(80% 0 0 0)}75%{clip-path:inset(35% 0 40% 0)}100%{clip-path:inset(100% 0 0 0)}}
+@keyframes gin{0%{opacity:0;transform:translateX(-14px) skewX(10deg);filter:hue-rotate(120deg)}35%{opacity:1;transform:translateX(8px) skewX(-8deg)}60%{transform:translateX(-4px) skewX(3deg);filter:hue-rotate(40deg)}100%{transform:none;filter:none}}
+.status,.tabs,.card,.hint{animation:gin .55s steps(7) both}
+main>*:nth-child(n+4){animation-delay:.05s}section>*:nth-child(2){animation-delay:.1s}section>*:nth-child(3){animation-delay:.2s}section>*:nth-child(4){animation-delay:.3s}
+.status.gl{animation:sg .5s steps(6)}
+@keyframes sg{0%{transform:translateX(-6px) skewX(8deg);filter:invert(1)}25%{transform:translateX(6px);filter:hue-rotate(160deg)}50%{transform:translateX(-3px) skewX(-6deg);filter:none}75%{transform:translateX(3px);filter:hue-rotate(60deg)}100%{transform:none;filter:none}}
+@keyframes bg{0%{transform:translate(-2px,1px);text-shadow:2px 0 var(--m),-2px 0 var(--c)}50%{transform:translate(3px,-1px);text-shadow:-3px 0 var(--m),3px 0 var(--c)}100%{transform:none;text-shadow:none}}
+.b:active,.tab:active,.pad button:active{animation:bg .3s steps(4)}
+@media(hover:hover){.b:hover,.tab:hover{animation:bg .35s steps(4)}}
+body::after{content:"";position:fixed;left:0;right:0;top:-120px;height:100px;pointer-events:none;z-index:50;background:linear-gradient(transparent,rgba(0,240,255,.07),transparent);animation:sw 6s linear infinite}
+@keyframes sw{to{transform:translateY(calc(100vh + 240px))}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important}}
+/* ---- more motion + guide ---- */
+.card{position:relative;animation:gin .55s steps(7) both,bcol 6s linear infinite .6s}
+@keyframes bcol{0%,100%{border-color:var(--m)}33%{border-color:var(--c)}66%{border-color:var(--y)}}
+.card.now{animation:gin .55s steps(7) both,nw .7s steps(2) infinite .6s}
+@keyframes nw{50%{box-shadow:5px 5px 0 var(--y);border-color:var(--y)}}
+.card.now::after{content:"DO THIS NOW";position:absolute;right:20px;top:5px;background:var(--y);color:#000;padding:3px 6px;font-size:7px;animation:ns .8s infinite steps(1)}
+.setup .card[data-s]:not(.now){opacity:.5}
+.b.p:not(:active){animation:glow 1.5s infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(252,238,10,0)}50%{box-shadow:0 0 14px 2px rgba(252,238,10,.7)}}
+.meter i{transition:width .06s}
+.sub{overflow:hidden;white-space:nowrap;width:0;max-width:100%;border-right:3px solid var(--c);animation:ty 2.6s steps(40) forwards,cur .6s steps(1) infinite}
+@keyframes ty{to{width:40ch}}@keyframes cur{50%{border-color:transparent}}
+.ticker{overflow:hidden;white-space:nowrap;border-top:2px solid var(--m);border-bottom:2px solid var(--m);margin:0 0 12px;padding:4px 0;color:var(--y);font-size:8px}
+.ticker span{display:inline-block;padding-left:100%;animation:tk 20s linear infinite}
+@keyframes tk{to{transform:translateX(-100%)}}
+.prog{display:flex;gap:4px;margin:12px 0}
+.prog i{flex:1;font-style:normal;text-align:center;border:2px solid var(--mut);color:var(--mut);padding:6px 0;font-size:9px;line-height:1.6}
+.prog i span{display:block;font-size:6px}
+.prog i.d{border-color:var(--ok);color:var(--ok);background:rgba(57,255,154,.12)}
+.prog i.n{border-color:var(--y);color:#000;background:var(--y);animation:pg .7s steps(2) infinite}
+@keyframes pg{50%{background:var(--m);color:#fff;border-color:var(--m)}}
+.status.linked{background:var(--ok)}
+.stage.live::before{display:none}
+.stage.live::after{content:"\25CF LIVE";position:absolute;left:6px;top:6px;z-index:4;background:var(--m);color:#fff;padding:3px 6px;font-size:8px;animation:ns 1.2s infinite steps(1)}
+body::before{animation:drift 10s ease-in-out infinite alternate}
+@keyframes drift{to{filter:hue-rotate(50deg);transform:scale(1.08)}}
+main.zap{animation:zap .36s steps(8)}
+@keyframes zap{0%{transform:none}20%{transform:translateX(-6px) skewX(4deg);filter:drop-shadow(4px 0 var(--m)) drop-shadow(-4px 0 var(--c))}40%{transform:translateX(7px)}60%{transform:translateX(-3px) skewX(-3deg);filter:hue-rotate(90deg)}80%{transform:translateX(2px)}100%{transform:none}}
+.fp{position:fixed;bottom:-10px;width:4px;height:4px;opacity:.5;z-index:-1;pointer-events:none;animation:fl linear infinite}
+@keyframes fl{to{transform:translateY(-110vh)}}
+.px{position:fixed;left:50%;top:40%;width:8px;height:8px;z-index:90;pointer-events:none;animation:bx .9s steps(8) forwards}
+@keyframes bx{to{transform:translate(var(--dx),var(--dy)) scale(.3);opacity:0}}
+/* ---- calm page: nothing slides or shakes ---- */
+.off{display:none!important}
+.nav{display:flex;align-items:center;gap:8px;margin:0 0 12px}
+.nav .b{flex:none;min-width:86px}
+.pgi{flex:1;text-align:center;color:var(--y);font-size:8px;line-height:1.6}
+.b[disabled]{opacity:.3;pointer-events:none;animation:none!important}
+.status,.tabs,.hint{animation:none}
+.card{animation:bcol 6s linear infinite}
+body::before{animation:none}
+body::after,.fp{display:none}
+.ticker{border-top:2px solid var(--m);border-bottom:2px solid var(--m);margin:0 0 12px;padding:6px 0;color:var(--y);font-size:8px;line-height:1.8;white-space:normal}
+.card.now::after,.stage.live::after{animation:bl .8s steps(1) infinite}
+@keyframes bl{50%{opacity:.3}}
+main.zap{animation:none}
+.status.gl{animation:sg2 .5s steps(5)}
+@keyframes sg2{0%{filter:invert(1)}25%{filter:hue-rotate(160deg)}50%{filter:none}75%{filter:hue-rotate(60deg)}100%{filter:none}}
+@keyframes bg2{0%{text-shadow:2px 0 var(--m),-2px 0 var(--c)}50%{text-shadow:-3px 0 var(--m),3px 0 var(--c)}100%{text-shadow:none}}
+.b:active,.tab:active,.pad button:active{animation:bg2 .3s steps(4)}
+@media(hover:hover){.b:hover,.tab:hover{animation:bg2 .35s steps(4)}}
 </style>
 </head>
 <body>
-<main>
-<h1>NEXCAM</h1>
-<div class="sub">&gt; CYBER LINK // iPAD + PHONE_</div>
+<main class="setup" id="mn">
+<h1 data-t="NEXCAM">NEXCAM</h1>
+<div class="sub">&gt; PHONE CAMERA + CAPTURE CARD ON iPAD_</div>
+<div class="ticker">PHONE = CAMERA // iPAD = SCREEN // FOLLOW THE YELLOW "DO THIS NOW" TAG</div>
 <div class="status cut"><span class="led" id="led"></span><span id="st">STANDBY</span></div>
+<div class="hint" id="hint">Tap which device THIS one is: PHONE or iPAD.</div>
+<div class="prog" id="prog"><i data-n="1">1<span>CAMERA</span></i><i data-n="2">2<span>CODE</span></i><i data-n="3">3<span>PASTE</span></i><i data-n="4">4<span>REPLY</span></i><i data-n="5">5<span>CONNECT</span></i></div>
+
+<details class="card cut guide" open><summary>HOW IT WORKS (READ ME FIRST)</summary>
+<div class="note"><b class="who ph">PHONE</b> = the camera.<br><b class="who ip">iPAD</b> = the screen you watch on.<br>Open this same page on BOTH.<br><br>Do the steps in order:<br>1 PHONE &gt; 2 PHONE &gt; 3 iPAD &gt; 4 iPAD &gt; 5 PHONE<br>Then the light turns green: LINKED.</div></details>
 
 <div class="tabs">
-<button class="tab act" id="tI">1 · iPAD</button>
-<button class="tab" id="tP">2 · PHONE</button>
+<button class="tab act" id="tI">iPAD<br><small>I watch here</small></button>
+<button class="tab" id="tP">PHONE<br><small>I am the camera</small></button>
 </div>
 
 <section id="ipad">
 <div class="card cut">
-<div class="step">01 // PASTE PHONE CODE</div>
+<div class="step"><b class="who ip">iPAD</b> STEP 3: PASTE THE PHONE CODE</div>
+<div class="note" style="margin:0 0 8px">Paste the long code the phone made in step 2.</div>
 <textarea id="offerIn" placeholder="Paste the code from the phone"></textarea>
-<div class="row"><button class="b p" id="mkAnswer">GENERATE REPLY</button></div>
+<div class="row"><button class="b p" id="mkAnswer">MAKE REPLY</button></div>
 </div>
 <div class="card cut">
-<div class="step">02 // SEND REPLY BACK</div>
+<div class="step"><b class="who ip">iPAD</b> STEP 4: SEND REPLY TO PHONE</div>
 <textarea id="answer" readonly placeholder="Reply appears here"></textarea>
 <div class="row"><button class="b" data-copy="answer">COPY REPLY</button></div>
-<div class="note">Paste it on the phone page (step 03), then tap CONNECT.</div>
+<div class="note">Send it to the phone, paste it in PHONE STEP 5, tap CONNECT.</div>
 </div>
 <div class="card cut">
-<div class="step">03 // LIVE FEED</div>
+<div class="step">WATCH // LIVE SCREEN</div>
 <div class="stage" id="stage"><video id="gameV" autoplay playsinline muted></video><div class="cam"><video id="remote" autoplay playsinline muted></video></div>
 <button class="b xfs" id="xfs">EXIT</button><div class="xy" id="xy">X 0 Y 0 1.0x</div></div>
 <div class="row"><button class="b" id="full">FULLSCREEN</button><button class="b" id="pr">RESET VIEW</button></div>
-<div class="step" style="margin-top:16px">GAME CAPTURE (CAPTURE CARD)</div>
+<div class="note">Shows NO SIGNAL until the phone is linked. Double-tap the picture to zoom.</div>
+</div>
+<div class="card cut">
+<div class="step">GAME // CAPTURE CARD</div>
+<div class="note" style="margin:0 0 8px">Plug the card into the iPad (USB-C), then:<br>1 SCAN 2 pick the card 3 START</div>
 <select id="vdev"><option value="">Tap SCAN VIDEO</option></select>
 <div class="row"><button class="b" id="vscan">SCAN VIDEO</button><button class="b p" id="gstart">START GAME</button></div>
-<div class="row"><button class="b" data-m="game">GAME ONLY</button><button class="b" data-m="both">GAME + CAM</button><button class="b" data-m="cam">CAM ONLY</button></div>
-<div class="note">Plug the capture card into the iPad (USB-C), tap SCAN VIDEO, pick the card, tap START GAME. For game sound use CARD SOUND INPUT in step 04.</div>
-<div class="step" style="margin-top:16px">CAMERA POSITION</div>
+<div class="step" style="margin-top:14px">WHAT TO SHOW</div>
+<div class="row" style="margin-top:0"><button class="b" data-m="game">GAME ONLY</button><button class="b" data-m="both">GAME + CAM</button><button class="b" data-m="cam">CAM ONLY</button></div>
+</div>
+<div class="card cut">
+<div class="step">MOVE THE CAMERA VIEW</div>
+<div class="note" style="margin:0 0 10px">Tap an arrow to look up, down, left or right. Centre dot = reset. (Digital move, the phone does not turn.)</div>
 <div class="pad" id="pad">
 <button data-x="-100" data-y="-100">&#8598;</button><button data-x="0" data-y="-100">&#8593;</button><button data-x="100" data-y="-100">&#8599;</button>
 <button data-x="-100" data-y="0">&#8592;</button><button class="mid" data-x="0" data-y="0">&#9679;</button><button data-x="100" data-y="0">&#8594;</button>
 <button data-x="-100" data-y="100">&#8601;</button><button data-x="0" data-y="100">&#8595;</button><button data-x="100" data-y="100">&#8600;</button>
 </div>
-<div class="ch"><label><span>X AXIS: LEFT / RIGHT</span><span id="vX">0</span></label><input type="range" id="px" min="-100" max="100" value="0"></div>
-<div class="ch"><label><span>Y AXIS: TOP / BOTTOM</span><span id="vY">0</span></label><input type="range" id="py" min="-100" max="100" value="0"></div>
+<div class="ch"><label><span>LEFT / RIGHT (X)</span><span id="vX">0</span></label><input type="range" id="px" min="-100" max="100" value="0"></div>
+<div class="ch"><label><span>UP / DOWN (Y)</span><span id="vY">0</span></label><input type="range" id="py" min="-100" max="100" value="0"></div>
 <div class="ch"><label><span>ZOOM</span><span id="vZ">1.0x</span></label><input type="range" id="pz" min="100" max="400" value="100"></div>
-<div class="note">Zoom in, then use the arrows, sliders, or drag the video to move the view. This is a digital pan/tilt on the iPad.</div>
 </div>
 <div class="card cut" id="mixbox">
-<div class="step">04 // AUDIO MIX BOX</div>
+<div class="step">SOUND // MIXER</div>
+<div class="note" style="margin:0 0 10px">Sound plays from the iPad speaker. Tap ENABLE first.</div>
 <div class="row" style="margin-top:0">
 <button class="b p" id="aOn">ENABLE AUDIO</button>
 <button class="b" id="tone">TEST SPEAKER</button>
 </div>
-<div class="ch" style="margin-top:14px"><label><span>PHONE MIC</span><span id="vm">100</span></label>
+<div class="ch" style="margin-top:14px"><label><span>VOICE (PHONE)</span><span id="vm">100</span></label>
 <input type="range" id="gm" min="0" max="200" value="100"><div class="meter"><i id="mm"></i></div></div>
-<div class="ch"><label><span>CARD / GAME</span><span id="vc">100</span></label>
+<div class="ch"><label><span>GAME SOUND</span><span id="vc">100</span></label>
 <input type="range" id="gc" min="0" max="200" value="100"><div class="meter"><i id="mc"></i></div></div>
-<div class="ch"><label><span>MASTER</span><span id="vx">100</span></label>
+<div class="ch"><label><span>MASTER VOLUME</span><span id="vx">100</span></label>
 <input type="range" id="gx" min="0" max="150" value="100"><div class="meter"><i id="mx"></i></div></div>
-<div class="step" style="margin-top:14px">CARD SOUND INPUT</div>
+<div class="step" style="margin-top:14px">GAME SOUND SOURCE</div>
 <select id="dev"><option value="">Tap SCAN INPUTS</option></select>
 <div class="row">
 <button class="b" id="scan">SCAN INPUTS</button>
-<button class="b p" id="testCard">TEST CARD SOUND</button>
+<button class="b p" id="testCard">START GAME SOUND</button>
 </div>
-<div class="note">Everything plays out of the iPad speaker through this mixer. If you hear the game twice, mute it in Orion or set CARD / GAME to 0 here. Keep the phone away from the iPad speaker to avoid echo.</div>
+<div class="note">Hear the game twice? Turn GAME SOUND to 0 or mute it on the console. Keep the phone away from the iPad speaker (echo).</div>
 </div>
 </section>
 
 <section id="phone" class="hide">
 <div class="card cut">
-<div class="step">01 // ACTIVATE CAMERA + MIC</div>
+<div class="step"><b class="who ph">PHONE</b> STEP 1: TURN ON CAMERA</div>
 <video id="local" autoplay muted playsinline></video>
-<div class="row"><button class="b p" id="cam">START CAMERA</button><button class="b" id="flip">FLIP</button></div>
+<div class="row"><button class="b p" id="cam">START CAMERA</button><button class="b" id="flip">FRONT / BACK</button></div>
+<div class="note">Tap Allow when asked for camera and mic.</div>
 </div>
 <div class="card cut">
-<div class="step">02 // CREATE LINK CODE</div>
-<button class="b p" id="mkOffer" style="width:100%">GENERATE CODE</button>
+<div class="step"><b class="who ph">PHONE</b> STEP 2: MAKE CODE</div>
+<button class="b p" id="mkOffer" style="width:100%">MAKE CODE</button>
 <textarea id="offer" readonly placeholder="Code appears here" style="margin-top:10px"></textarea>
 <div class="row"><button class="b" data-copy="offer">COPY CODE</button></div>
-<div class="note">Send this to the iPad page by AirDrop, Messages or Notes.</div>
+<div class="note">Send it to the iPad (AirDrop, Messages or Notes), then do iPAD STEP 3.</div>
 </div>
 <div class="card cut">
-<div class="step">03 // PASTE iPAD REPLY</div>
+<div class="step"><b class="who ph">PHONE</b> STEP 5: PASTE iPAD REPLY</div>
 <textarea id="answerIn" placeholder="Paste the reply from the iPad"></textarea>
 <div class="row"><button class="b p" id="connect">CONNECT</button></div>
 </div>
+</div>
 </section>
 
-<div class="card cut"><div class="step">LINK TIPS</div>
-<div class="note">&gt; Same Wi-Fi on both, no VPN, Private Relay off.<br>&gt; Keep both pages open until status says LINKED.<br>&gt; Always make a fresh code per attempt.</div></div>
+<div class="card cut"><div class="step">WON'T CONNECT?</div>
+<div class="note">&gt; Same Wi-Fi on both. VPN off. Private Relay off.<br>&gt; Keep both pages open until it says LINKED.<br>&gt; Every try needs a FRESH code (redo steps 2 to 5).</div></div>
 </main>
 <script>
 const $=id=>document.getElementById(id);
 let pc,stream,facing="user",ctx,master,gM,gC,aM,aC,aX,remoteStream,cardStream,mSrc,cSrc;
 const cfg={iceServers:[{urls:"stun:stun.l.google.com:19302"},{urls:"stun:stun1.l.google.com:19302"}]};
-function setS(t,c){$("st").textContent=t;$("led").className="led "+(c||"")}
-function show(w){$("phone").classList.toggle("hide",w!=="p");$("ipad").classList.toggle("hide",w!=="i");$("tP").classList.toggle("act",w==="p");$("tI").classList.toggle("act",w==="i")}
+const HINTS=[[/CAMERA ONLINE/,"Camera works. Next: MAKE CODE (step 2)."],[/BUILDING/,"Wait a few seconds..."],[/CODE READY/,"Copy the code and send it to the iPad."],[/REPLY READY/,"Copy the reply and paste it on the phone (step 5)."],[/HANDSHAKING/,"Connecting. Wait a few seconds."],[/LINKED/,"Connected! The phone camera is live on the iPad."],[/FAILED|LOST/,"Link dropped. Start over with a fresh code."],[/INVALID|BAD CODE|THAT IS|NOT THE|GENERATE CODE FIRST/,"That code did not work. Make a new one and paste ALL of it."],[/BLOCKED|ACCESS/,"Allow camera/mic: iPhone Settings > Safari > Camera and Microphone."],[/GAME CAPTURE LIVE/,"Game is live. Use WHAT TO SHOW to pick the layout."],[/FOUND/,"Now pick one from the list."],[/AUDIO ONLINE/,"Sound is on. Tap TEST SPEAKER to check."],[/CARD AUDIO LIVE/,"Game sound is on. Watch the meter move."]];
+function setS(t,c){$("st").textContent=t;$("led").className="led "+(c||"");
+ const h=HINTS.find(x=>x[0].test(t));if(h)$("hint").textContent=h[1];
+ const e=document.querySelector(".status");e.classList.remove("gl");void e.offsetWidth;e.classList.add("gl");e.classList.toggle("linked",/LINKED/.test(t));trk(t)}
+function show(w){role=w;setTimeout(()=>{rend();if(!linked)$("hint").textContent=w==="p"?"PHONE: start at step 1, tap START CAMERA.":"iPAD: wait for the phone code, then paste it in step 3."},0);$("phone").classList.toggle("hide",w!=="p");$("ipad").classList.toggle("hide",w!=="i");$("tP").classList.toggle("act",w==="p");$("tI").classList.toggle("act",w==="i")}
 $("tP").onclick=()=>show("p");$("tI").onclick=()=>show("i");
 const enc=d=>btoa(unescape(encodeURIComponent(JSON.stringify({t:d.type,s:d.sdp}))));
 const dec=s=>{s=s.replace(/[^A-Za-z0-9+\/=_-]/g,"").replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";const o=JSON.parse(decodeURIComponent(escape(atob(s))));if(!o||!o.s)throw new Error("empty");return{type:o.t,sdp:o.s}};
@@ -167,7 +265,7 @@ function newPC(){
   else if(s==="connecting")setS("HANDSHAKING","wait");
   else if(s==="failed")setS("LINK FAILED - NEW CODE","bad");
   else if(s==="disconnected")setS("SIGNAL LOST","bad")};
- pc.ontrack=e=>{remoteStream=e.streams[0];$("remote").srcObject=remoteStream;$("remote").play().catch(()=>{});hookMic()};
+ pc.ontrack=e=>{remoteStream=e.streams[0];$("remote").srcObject=remoteStream;$("remote").play().catch(()=>{});$("stage").classList.add("live");hookMic()};
 }
 function gathered(){return new Promise(r=>{if(pc.iceGatheringState==="complete")return r();
  const t=setTimeout(r,5000);
@@ -232,7 +330,7 @@ $("gstart").onclick=async()=>{
   const id=$("vdev").value;
   gameStream=await navigator.mediaDevices.getUserMedia({video:{...(id?{deviceId:{exact:id}}:{}),width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:60}},audio:false});
   $("gameV").srcObject=gameStream;$("gameV").play().catch(()=>{});
-  setMode("both");setS("GAME CAPTURE LIVE","on");
+  setMode("both");$("stage").classList.add("live");setS("GAME CAPTURE LIVE","on");
  }catch(e){setS("GAME CAPTURE: "+e.name,"bad")}
 };
 /* ---- CAMERA POSITION (digital pan / tilt / zoom) ---- */
@@ -325,6 +423,28 @@ $("testCard").onclick=async()=>{
   setS("CARD AUDIO LIVE - WATCH METER","on");
  }catch(e){setS("CARD AUDIO: "+e.name,"bad")}
 };
+
+/* ---- GUIDE ---- */
+var role="i",cur={p:1,i:3},linked=false;
+document.querySelectorAll(".step").forEach(e=>{const m=e.textContent.match(/STEP (\d)/);if(m)e.closest(".card").dataset.s=m[1]});
+function rend(){
+ const c=linked?6:cur[role];
+ document.querySelectorAll("#prog i").forEach(i=>{const n=+i.dataset.n;i.className=n<c?"d":n===c?"n":""});
+ document.querySelectorAll(".card[data-s]").forEach(k=>k.classList.toggle("now",!linked&&+k.dataset.s===c));
+ $("mn").classList.toggle("setup",!linked);
+}
+function trk(t){
+ if(/LINKED/.test(t)){if(!linked){linked=true;burst()}}
+ else if(/FAILED|LOST/.test(t)){linked=false;cur={p:1,i:3}}
+ else if(/CAMERA ONLINE/.test(t))cur.p=Math.max(cur.p,2);
+ else if(/CODE READY/.test(t))cur.p=5;
+ else if(/REPLY READY/.test(t))cur.i=5;
+ rend();
+}
+function burst(){for(let i=0;i<30;i++){const p=document.createElement("div");p.className="px";const a=Math.random()*6.28,d=80+Math.random()*160;
+ p.style.cssText=`--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d}px;background:${["#fcee0a","#00f0ff","#ff2a6d","#39ff9a"][i%4]}`;
+ document.body.appendChild(p);setTimeout(()=>p.remove(),1000)}}
+rend();
 </script>
 </body>
 </html>
